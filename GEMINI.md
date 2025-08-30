@@ -2,32 +2,56 @@
 
 ## 프로젝트 개요
 
-이 프로젝트는 Notion 데이터베이스에서 저널 항목을 가져와 Markdown 파일로 변환한 다음 해당 파일을 단일 통합 Markdown 문서로 병합하도록 설계된 Node.js 애플리케이션입니다. Notion API와 상호 작용하기 위해 `@notionhq/client`를 사용하고 Notion 형식을 Markdown으로 변환하기 위해 `notion-to-md`를 사용합니다.
+이 프로젝트는 Notion 데이터베이스에서 저널 항목을 가져와 Markdown 파일로 변환한 다음, 주차별로 정렬하여 단일 Markdown 문서로 병합하는 Node.js 기반 CLI 애플리케이션입니다.
 
-작업 흐름은 다음과 같습니다.
-1.  `index.js`: 프로세스를 조정하는 기본 스크립트입니다. 특정 연도 및 분기의 저널 항목을 가져옵니다.
-2.  `notion/fetch.js`: Notion API를 사용하여 지정된 Notion 데이터베이스에서 저널 항목을 가져옵니다. "연도" 및 "분기"별로 항목을 필터링합니다.
-3.  `notion/exportMarkdown.js`: 가져온 Notion 페이지를 개별 Markdown 파일로 변환합니다. 각 파일의 이름은 페이지 제목을 따릅니다.
-4.  `merge.js` 및 `mergeMarkdownByWeek.js`: 이 스크립트는 `output` 디렉터리에서 개별 Markdown 파일을 가져와 주 번호로 정렬하고 `merged` 디렉터리에 `통합일지.md`라는 단일 파일로 병합합니다.
+주요 기능은 다음과 같습니다:
+*   **분기별 데이터 조회**: 특정 분기를 지정하여 해당 기간의 저널만 가져올 수 있습니다.
+*   **자동 이전 분기 조회**: 별도의 분기 지정이 없으면, 스크립트 실행 시점을 기준으로 자동으로 이전 분기의 데이터를 조회합니다.
+*   **통합 프로세스**: 데이터 조회, 마크다운 변환, 파일 병합까지의 모든 과정이 단일 명령어로 실행됩니다.
+
+## 기술 스택 및 의존성
+
+*   `@notionhq/client`: Notion API 연동
+*   `dotenv`: API 키, 데이터베이스 ID 등 환경 변수 관리
+*   `notion-to-md`: Notion 페이지를 Markdown으로 변환
 
 ## 빌드 및 실행
 
-**의존성:**
-*   `@notionhq/client`: Notion API에 연결합니다.
-*   `dotenv`: 환경 변수(API 키, 데이터베이스 ID)를 관리합니다.
-*   `notion-to-md`: Notion 페이지를 Markdown으로 변환합니다.
+**1. 의존성 설치**
 
-**설정:**
-1.  의존성 설치: `npm install`
-2.  루트 디렉터리에 다음 변수를 사용하여 `.env` 파일을 만듭니다.
-    ```
-    NOTION_API_KEY=your_notion_api_key
-    NOTION_DATABASE_ID=your_notion_database_id
+프로젝트에 필요한 모든 패키지를 설치합니다.
+```bash
+npm install
+```
+
+**2. 환경 변수 설정**
+
+프로젝트 루트 디렉터리에 `.env` 파일을 생성하고 아래 내용을 본인의 정보로 교체하여 입력합니다.
+
+```
+NOTION_API_KEY=your_notion_api_key
+NOTION_DATABASE_ID=your_notion_database_id
+```
+
+**3. 애플리케이션 실행**
+
+모든 설정이 완료되면 아래 명령어를 사용하여 저널을 가져올 수 있습니다.
+
+*   **이전 분기 데이터 가져오기 (기본 실행):**
+    ```bash
+    npm run journal
     ```
 
-**애플리케이션 실행:**
-*   Notion 페이지를 가져오고 변환하려면: `npm start`
-*   변환된 마크다운 파일을 병합하려면: `node merge.js`
+*   **특정 분기 데이터 가져오기 (인자 사용):**
+    `--quarter` 또는 `-q` 플래그를 사용하여 원하는 분기(1~4)를 지정할 수 있습니다.
+    ```bash
+    # 2분기 데이터 가져오기
+    npm run journal -- --quarter 2
+
+    # 4분기 데이터 가져오기
+    npm run journal -- -q 4
+    ```
+    > **참고:** npm 스크립트에 인자를 전달하려면 명령어 중간에 `--`를 반드시 포함해야 합니다.
 
 ## 개발 규칙
 
